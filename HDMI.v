@@ -87,7 +87,7 @@ wire rd_req;
 			.rd_data (rd_data)
 		);
 		
-	hdmi_trans hdmi_trans(
+     hdmi_trans hdmi_trans(
 			.clk1x           (clk1x),
 			.clk5x           (clk5x),
 			.rst             (rst),
