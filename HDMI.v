@@ -105,5 +105,5 @@ wire rd_req;
 			.hdmi_tx_chn_g_p (hdmi_tx_chn_g_p),
 			.hdmi_tx_chn_b_n (hdmi_tx_chn_b_n),
 			.hdmi_tx_chn_b_p (hdmi_tx_chn_b_p)
-		);
+	        );
 endmodule
