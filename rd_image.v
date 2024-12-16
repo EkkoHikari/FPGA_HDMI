@@ -59,3 +59,4 @@ rom_image rom (
   .douta(dout)  // output wire [23 : 0] douta
 );
 endmodule
+
