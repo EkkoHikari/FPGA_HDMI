@@ -118,9 +118,5 @@ OSERDESE2 #(
    );
 
 
-
+	
 endmodule
-
-
-
-
