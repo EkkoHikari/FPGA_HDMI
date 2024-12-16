@@ -94,7 +94,7 @@ output reg [23:0] rgb //输出图像值RGB888
             end
     end
     
-    //场同步信号(这些状态机写的都不标准)
+    //场同步信号
     always @(posedge vpg_pclk) begin
         if(rst==1'b1) begin
             vpg_vs<=1'b1;
