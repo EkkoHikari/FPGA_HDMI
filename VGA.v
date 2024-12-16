@@ -21,67 +21,67 @@
 
 
 module VGA(
-input wire rst, //¸´Î»
-input wire vpg_pclk, //ÏñËØÊ±ÖÓ
-output reg vpg_de, //Êä³öÊı¾İÓĞĞ§ĞÅºÅ
-output reg vpg_hs, //ĞĞÍ¬²½ĞÅºÅ
-output reg vpg_vs, //³¡Í¬²½ĞÅºÅ
+input wire rst, //å¤ä½
+input wire vpg_pclk, //åƒç´ æ—¶é’Ÿ
+output reg vpg_de, //è¾“å‡ºæ•°æ®æœ‰æ•ˆä¿¡å·
+output reg vpg_hs, //è¡ŒåŒæ­¥ä¿¡å·
+output reg vpg_vs, //åœºåŒæ­¥ä¿¡å·
 
-output reg rd_req,//¶ÁÊı¾İÇëÇó
-input wire [23:0] rd_data,//¶Á³öµÄÍ¼ÏñÊı¾İ
-output reg [23:0] rgb //Êä³öÍ¼ÏñÖµRGB888
+output reg rd_req,//è¯»æ•°æ®è¯·æ±‚
+input wire [23:0] rd_data,//è¯»å‡ºçš„å›¾åƒæ•°æ®
+output reg [23:0] rgb //è¾“å‡ºå›¾åƒå€¼RGB888
     );
-    //ÓÉÆÁÄ»µÄ·Ö±æÂÊÓëË¢ĞÂÂÊ¼ÆËã³¡ÆµÂÊ£¬ĞĞÆµÂÊÓëÏñËØÊ±ÖÓÆµÂÊ
-    parameter H_TOTAL = 96+16+640+48 - 1 ;//Ò»ĞĞ×Ü¹²ĞèÒª¼ÆÊıµÄÖµ
-    parameter H_SYNC = 96 - 1 ;//ĞĞÍ¬²½¼ÆÊıÖµ
-    parameter H_START = 96+16 - 1 ;//ĞĞÍ¼ÏñÊı¾İÓĞĞ§¿ªÊ¼¼ÆÊıÖµ
-    parameter H_END = 96+16+640 - 1 ;//ĞĞÍ¼ÏñÊı¾İÓĞĞ§½áÊø¼ÆÊıÖµ
+    //ç”±å±å¹•çš„åˆ†è¾¨ç‡ä¸åˆ·æ–°ç‡è®¡ç®—åœºé¢‘ç‡ï¼Œè¡Œé¢‘ç‡ä¸åƒç´ æ—¶é’Ÿé¢‘ç‡
+    parameter H_TOTAL = 96+16+640+48 - 1 ;//ä¸€è¡Œæ€»å…±éœ€è¦è®¡æ•°çš„å€¼
+    parameter H_SYNC = 96 - 1 ;//è¡ŒåŒæ­¥è®¡æ•°å€¼
+    parameter H_START = 96+16 - 1 ;//è¡Œå›¾åƒæ•°æ®æœ‰æ•ˆå¼€å§‹è®¡æ•°å€¼
+    parameter H_END = 96+16+640 - 1 ;//è¡Œå›¾åƒæ•°æ®æœ‰æ•ˆç»“æŸè®¡æ•°å€¼
     
-    parameter V_TOTAL = 2+10+480+33 - 1 ;//³¡×Ü¹²ĞèÒª¼ÆÊıµÄÖµ
-    parameter V_SYNC = 2 - 1 ;//³¡Í¬²½¼ÆÊıÖµ
-    parameter V_START = 2+10 - 1 ;//³¡Í¼ÏñÊı¾İÓĞĞ§¿ªÊ¼¼ÆÊıÖµ
-    parameter V_END = 2+10+480 - 1 ;//³¡Í¼ÏñÊı¾İÓĞĞ§½áÊø¼ÆÊıÖµ
+    parameter V_TOTAL = 2+10+480+33 - 1 ;//åœºæ€»å…±éœ€è¦è®¡æ•°çš„å€¼
+    parameter V_SYNC = 2 - 1 ;//åœºåŒæ­¥è®¡æ•°å€¼
+    parameter V_START = 2+10 - 1 ;//åœºå›¾åƒæ•°æ®æœ‰æ•ˆå¼€å§‹è®¡æ•°å€¼
+    parameter V_END = 2+10+480 - 1 ;//åœºå›¾åƒæ•°æ®æœ‰æ•ˆç»“æŸè®¡æ•°å€¼
     
-    parameter SQUARE_X = 256;//·½¿éµÄ¿í¶È
-    parameter SQUARE_Y = 256;//·½¿éµÄ³¤¶È
-    parameter SCREEN_X = 640;//ÆÁÄ»Ë®Æ½³¤¶È
-    parameter SCREEN_Y = 480;//ÆÁÄ»´¹Ö±³¤¶È
+    parameter SQUARE_X = 256;//æ–¹å—çš„å®½åº¦
+    parameter SQUARE_Y = 256;//æ–¹å—çš„é•¿åº¦
+    parameter SCREEN_X = 640;//å±å¹•æ°´å¹³é•¿åº¦
+    parameter SCREEN_Y = 480;//å±å¹•å‚ç›´é•¿åº¦
     
-    reg [12:0] cnt_h; //ĞĞ¼ÆÊıÆ÷
-    reg [12:0] cnt_v; //³¡¼ÆÊıÆ÷
-    parameter x=12'd192; //·½¿é×óÉÏ½Çºá×ø±ê
-    parameter y=12'd112; //·½¿é×óÉÏ½Ç×İ×ø±ê
+    reg [12:0] cnt_h; //è¡Œè®¡æ•°å™¨
+    reg [12:0] cnt_v; //åœºè®¡æ•°å™¨
+    parameter x=12'd192; //æ–¹å—å·¦ä¸Šè§’æ¨ªåæ ‡
+    parameter y=12'd112; //æ–¹å—å·¦ä¸Šè§’çºµåæ ‡
     
-    //PLLÀı»¯Ìá¹©ÏñËØÊ±ÖÓ
+    //PLLä¾‹åŒ–æä¾›åƒç´ æ—¶é’Ÿ
     
     
-    //ĞĞ¼ÆÊıÆ÷
+    //è¡Œè®¡æ•°å™¨
     always @(posedge vpg_pclk ) begin
         if (rst==1'b1) begin
             cnt_h <= 'd0;
             end
-        else if (cnt_h == H_TOTAL) begin//¼ÆÊıµ½×î´óÖµ£¬ÇåÁã
+        else if (cnt_h == H_TOTAL) begin//è®¡æ•°åˆ°æœ€å¤§å€¼ï¼Œæ¸…é›¶
              cnt_h <= 'd0;
             end
-        else if(cnt_h != H_TOTAL) begin//»¹Ã»ÓĞ¼ÆÊıµ½×î´óÖµ£¬Ã¿¸öÊ±ÖÓÖÜÆÚ¼ÓÒ»
+        else if(cnt_h != H_TOTAL) begin//è¿˜æ²¡æœ‰è®¡æ•°åˆ°æœ€å¤§å€¼ï¼Œæ¯ä¸ªæ—¶é’Ÿå‘¨æœŸåŠ ä¸€
             cnt_h <= cnt_h + 1'b1;
             end
         end
 
-    //³¡¼ÆÊıÆ÷
+    //åœºè®¡æ•°å™¨
     always @(posedge vpg_pclk ) begin
         if (rst==1'b1) begin
             cnt_v <='d0;
             end
-        else if (cnt_v == V_TOTAL && cnt_h == H_TOTAL) begin//³¡¼ÆÊıÆ÷¼ÆÊıµ½×î´óÖµ£¬ÇåÁã£¨Ò»Ö¡½áÊø£©
+        else if (cnt_v == V_TOTAL && cnt_h == H_TOTAL) begin//åœºè®¡æ•°å™¨è®¡æ•°åˆ°æœ€å¤§å€¼ï¼Œæ¸…é›¶ï¼ˆä¸€å¸§ç»“æŸï¼‰
             cnt_v <= 'd0;
             end
-        else if(cnt_h == H_TOTAL) begin//Ò»ĞĞÉ¨Ãè½áÊø£¬³¡¼ÆÊıÆ÷¼ÓÒ»
+        else if(cnt_h == H_TOTAL) begin//ä¸€è¡Œæ‰«æç»“æŸï¼Œåœºè®¡æ•°å™¨åŠ ä¸€
             cnt_v <= cnt_v + 1'b1;
             end
         end
         
-     //ĞĞÍ¬²½ĞÅºÅ
+     //è¡ŒåŒæ­¥ä¿¡å·
      always @(posedge vpg_pclk) begin
         if(rst==1'b1) begin
             vpg_hs<=1'b1;
@@ -94,7 +94,7 @@ output reg [23:0] rgb //Êä³öÍ¼ÏñÖµRGB888
             end
     end
     
-    //³¡Í¬²½ĞÅºÅ(ÕâĞ©×´Ì¬»úĞ´µÄ¶¼²»±ê×¼)
+    //åœºåŒæ­¥ä¿¡å·(è¿™äº›çŠ¶æ€æœºå†™çš„éƒ½ä¸æ ‡å‡†)
     always @(posedge vpg_pclk) begin
         if(rst==1'b1) begin
             vpg_vs<=1'b1;
@@ -107,7 +107,7 @@ output reg [23:0] rgb //Êä³öÍ¼ÏñÖµRGB888
             end
     end
     
-    //Êı¾İÓĞĞ§ĞÅºÅ
+    //æ•°æ®æœ‰æ•ˆä¿¡å·
     always @(posedge vpg_pclk) begin
         if(rst==1'b1) begin
             vpg_de<=1'b0;
@@ -140,8 +140,8 @@ output reg [23:0] rgb //Êä³öÍ¼ÏñÖµRGB888
             rgb <='d0;
         end
         else if(cnt_h >=H_START+x && cnt_h <H_START+SQUARE_X+x && cnt_v >=V_START+y && cnt_v <V_START+SQUARE_Y+y)begin
-            //×ª»»ÎªBGR¸ñÊ½
-            rgb <= rd_data;//Êä³ö·½¿éÍ¼Ïñ
+            //è½¬æ¢ä¸ºBGRæ ¼å¼
+            rgb <= rd_data;//è¾“å‡ºæ–¹å—å›¾åƒ
         end
         else if (cnt_h >=H_START && cnt_h <H_END && cnt_v >=V_START && cnt_v <V_END && cnt_h[4:0]>='d20) begin
             rgb <=24'h00FF00;//green
