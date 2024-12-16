@@ -118,3 +118,4 @@ wire 	[9:0]	encode_chn_b;
 
 
 endmodule
+
